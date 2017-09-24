@@ -1,0 +1,18 @@
+[general]
+state_file = /var/lib/awslogs/agent-state
+
+[/var/log/httpd/access_log]
+datetime_format = %b %d %H:%M:%S
+buffer_duration = 5000
+log_stream_name = {hostname}.access_log
+initial_position = start_of_file
+file = /var/log/httpd/access_log.*
+log_group_name = access_log
+
+[/var/log/httpd/error_log]
+datetime_format = %b %d %H:%M:%S
+buffer_duration = 5000
+log_stream_name = {hostname}.httpd_error_log
+initial_position = start_of_file
+file = /var/log/httpd/error_log.*
+log_group_name = error_log
