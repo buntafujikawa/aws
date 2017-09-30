@@ -17,8 +17,8 @@ resource "aws_db_instance" "sitename-db" {
   multi_az                   = false
   backup_retention_period    = 1
   backup_window              = "19:00-19:30"
-  vpc_security_group_ids     = ["${aws_security_group.rds_sg.id}"]
+  vpc_security_group_ids     = ["${aws_security_group.rds-sg.id}"]
   db_subnet_group_name       = "${aws_db_subnet_group.sitename-db-subnet.name}"
   auto_minor_version_upgrade = true
-  final_snapshot_identifier  = "sitename-final"
+  final_snapshot_identifier  = "sitename-final" # _ダメらしい
 }
