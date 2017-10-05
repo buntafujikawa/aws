@@ -1,0 +1,10 @@
+---
+- name: setup url for nodejs
+  get_url: url="https://rpm.nodesource.com/setup" dest="/tmp/setup_node.sh" mode=0755
+
+- name: setup nodejs
+  shell: /tmp/setup_node.sh
+
+# dry runだとこけるので注意
+- name: install nodejs
+  yum: name=nodejs state=latest

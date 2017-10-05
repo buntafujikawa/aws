@@ -1,0 +1,62 @@
+---
+# これを参考にitemを修正 https://github.com/sstephenson/ruby-build/wiki
+- name: install dependencies
+  yum: name={{ item }} state=latest # latestで最新に更新する
+  with_items:
+    - git
+    - gcc
+    - openssl-devel
+    - libyaml-devel
+    - libffi-devel
+    - readline-devel
+    - zlib-devel
+    - gdbm-devel
+    - ncurses-devel
+    - libxml2
+    - ImageMagick
+    - ImageMagick-devel
+    - epel-release
+    - mysql-devel
+    - patch
+
+# 先にgitを入れておかないいとdry runでこけるので注意
+- name: install rbenv
+  git: repo=https://github.com/sstephenson/rbenv.git dest=~/.rbenv
+
+- name: add ~.rbenv/bin to PATH
+  lineinfile: >
+    dest="~/.bash_profile"
+    line="export PATH=$HOME/.rbenv/bin:$PATH"
+
+- name: eval rbenv init in ~/.bash_profile
+  lineinfile: >
+    dest="~/.bash_profile"
+    line='eval "$(rbenv init -)"'
+
+- name: install ruby-build as rbenv plugin
+  git: repo=https://github.com/sstephenson/ruby-build.git dest=~/.rbenv/plugins/ruby-build
+
+# become使えと言われるので要修正
+- name: Check if version is installed ruby
+  shell: "sudo -iu {{ rbenv_user }} rbenv versions | grep {{ rbenv_ruby_version }}"
+  register: rbenv_check_install
+  changed_when: False
+  ignore_errors: yes
+
+- name: install ruby
+  command: "sudo -iu {{ rbenv_user }} rbenv install {{ rbenv_ruby_version }}"
+  when: rbenv_check_install|failed
+
+#- name: Check if version is the default ruby version
+#  shell: "sudo -iu {{ rbenv_user }} rbenv version | grep {{ rbenv_ruby_version }}"
+#  register: rbenv_check_default
+#  changed_when: False
+#  ignore_errors: yes
+
+#- name: rbenv rehash
+#  command: "rbenv rehash"
+#  when: rbenv_check_default|failed
+
+#- name: set default ruby version
+#  command: "rbenv global {{ rbenv_ruby_version }}"
+#  when: rbenv_check_default|failed
