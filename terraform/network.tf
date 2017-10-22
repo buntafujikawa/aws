@@ -67,6 +67,7 @@ resource "aws_internet_gateway" "gateway-for-sitename" {
 }
 
 # route table
+# TODO 作成したルートテーブルをメインにする設定を入れる必要が有る
 resource "aws_route_table" "vpc-main-public-rtb" {
   vpc_id = "${aws_vpc.vpc-main.id}"
   route {
