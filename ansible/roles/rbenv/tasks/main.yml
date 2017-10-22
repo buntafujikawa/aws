@@ -47,16 +47,16 @@
   command: "sudo -iu {{ rbenv_user }} rbenv install {{ rbenv_ruby_version }}"
   when: rbenv_check_install|failed
 
-#- name: Check if version is the default ruby version
-#  shell: "sudo -iu {{ rbenv_user }} rbenv version | grep {{ rbenv_ruby_version }}"
-#  register: rbenv_check_default
-#  changed_when: False
-#  ignore_errors: yes
+- name: Check if version is the default ruby version
+  shell: "sudo -iu {{ rbenv_user }} rbenv version | grep {{ rbenv_ruby_version }}"
+  register: rbenv_check_default
+  changed_when: False
+  ignore_errors: yes
 
-#- name: rbenv rehash
-#  command: "rbenv rehash"
-#  when: rbenv_check_default|failed
+- name: rbenv rehash
+  command: "rbenv rehash"
+  when: rbenv_check_default|failed
 
-#- name: set default ruby version
-#  command: "rbenv global {{ rbenv_ruby_version }}"
-#  when: rbenv_check_default|failed
+- name: set default ruby version
+  command: "rbenv global {{ rbenv_ruby_version }}"
+  when: rbenv_check_default|failed

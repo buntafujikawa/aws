@@ -1,12 +1,29 @@
 ---
 - hosts: all
   vars:
+    rbenv_user: ec2-user
+    rbenv_ruby_version: 2.3.1 # 使ってるrubyのバージョンに修正
   remote_user: ec2-user
-  become: yes
+  become: yes # sudoの代わり
 
   roles:
-    - { role: cloudwatch-logs }
+#    - { role: cloudwatch-logs }
+    - { role: rbenv }
+    - { role: nodejs }
+    - { role: railsenv }
+    - { role: nginx }
   
   tasks:
+    # hostnameは適宜修正
     - name: Set hostname.
-      lineinfile: dest=/etc/sysconfig/network regexp='^HOSTNAME' line='HOSTNAME=test-ec2' backup=yes
+      lineinfile: dest=/etc/sysconfig/network regexp='^HOSTNAME' line='HOSTNAME=ansible-test' backup=yes
+
+    - name: Create directory for deploy
+      file: path=/var/www state=directory mode=0755 owner=ec2-user group=ec2-user
+
+    # time zoneを日本の時刻に合わせる
+    - name: Set Timezone.
+      lineinfile: dest=/etc/sysconfig/clock regexp='^ZONE' line='ZONE="Asia/Tokyo"' backup=yes
+
+    - name: Update /etc/localtime.
+      file: src=/usr/share/zoneinfo/Asia/Tokyo dest=/etc/localtime state=link force=yes

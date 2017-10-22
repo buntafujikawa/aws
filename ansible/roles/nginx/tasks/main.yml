@@ -1,0 +1,18 @@
+---
+- name: install nginx
+  yum: name=nginx state=latest
+
+- name: pet nginx service to start on boot
+  service: name=nginx enabled=true # 自動起動させるか
+
+- name: put nginx.conf
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf backup=true mode=0644
+  notify: restart nginx
+
+- name: put sitename.conf
+  template: src=sitename.conf.j2 dest=/etc/nginx/conf.d/sitename.conf backup=true mode=0644
+  notify: restart nginx
+
+# 参考 https://qiita.com/kidach1/items/985efebba639713c562e
+- name: put index.html
+  template: src= dest=/usr/share/nginx/html/index.html mode=644index.html.j2
