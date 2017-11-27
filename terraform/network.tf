@@ -32,6 +32,17 @@ resource "aws_subnet" "public-web2" {
   }
 }
 
+resource "aws_subnet" "public-web-staging" {
+  vpc_id                  = "${aws_vpc.vpc-main.id}"
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "ap-northeast-1c"
+  map_public_ip_on_launch = true
+
+  tags {
+    "Name" = "public-web-staging"
+  }
+}
+
 # subnet private
 resource "aws_subnet" "private-db" {
   vpc_id            = "${aws_vpc.vpc-main.id}"
@@ -67,19 +78,38 @@ resource "aws_internet_gateway" "gateway-for-sitename" {
 }
 
 # route table
-# TODO 作成したルートテーブルをメインにする設定を入れる必要が有る
 resource "aws_route_table" "vpc-main-public-rtb" {
   vpc_id = "${aws_vpc.vpc-main.id}"
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = "${aws_internet_gateway.gateway-for-sitename.id}"
   }
+
   tags {
     Name = "vpc-main-public-rtb"
   }
 }
 
-resource "aws_route_table_association" "public-a" {
-  subnet_id      = "${aws_subnet.public-web.id}"
-  route_table_id = "${aws_route_table.vpc-main-public-rtb.id}" # publicのsubnetのみを紐付けるようにする
+resource "aws_route_table" "vpc-main-staging-rtb" {
+  vpc_id     = "${aws_vpc.vpc-main.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.gateway-for-sitename.id}"
+  }
+
+  tags {
+    "Name" = "vpc-main-staging-rtb"
+  }
+}
+
+resource "aws_route_table_association" "vpc-main-public-rtb-rtbassoc-6fc63409" {
+  route_table_id = "${aws_route_table.vpc-main-public-rtb.id}"
+  subnet_id = "${aws_subnet.public-web.id}"
+}
+
+resource "aws_route_table_association" "vpc-main-staging-rtb-rtbassoc-07ec2161" {
+  route_table_id = "${aws_route_table.vpc-main-staging-rtb.id}"
+  subnet_id = "${aws_subnet.public-web-staging.id}"
 }
