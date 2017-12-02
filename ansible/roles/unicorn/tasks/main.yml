@@ -1,2 +1,6 @@
+---
+- name: Install unicorn
+  gem: name=unicorn executable=.rbenv/shims/gem user_install=False
+
 - name: put auto restart unicorn scripts
   template: src=unicorn.j2 dest=/etc/init.d/unicorn backup=true mode=0755

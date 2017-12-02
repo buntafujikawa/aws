@@ -4,6 +4,7 @@
 
 - name: setup nodejs
   shell: /tmp/setup_node.sh
+  changed_when: False
 
 # dry runだとこけるので注意
 - name: install nodejs
