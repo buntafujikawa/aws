@@ -4,22 +4,27 @@
     rbenv_user: ec2-user
     rbenv_ruby_version: 2.3.1 # 使ってるrubyのバージョンに修正
   remote_user: ec2-user
-  become: yes # sudoの代わり
+  become:  yes
 
   roles:
-#    - { role: cloudwatch-logs }
+    # rubyの入れるにはAWSのt2.mediumぐらいのインスタンスタイプじゃないと終わらないので注意
     - { role: rbenv }
     - { role: nodejs }
     - { role: railsenv }
     - { role: nginx }
+    - { role: unicorn }
+#    - { role: cloudwatch-logs }
   
   tasks:
     # hostnameは適宜修正
     - name: Set hostname.
       lineinfile: dest=/etc/sysconfig/network regexp='^HOSTNAME' line='HOSTNAME=ansible-test' backup=yes
 
-    - name: Create directory for deploy
-      file: path=/var/www state=directory mode=0755 owner=ec2-user group=ec2-user
+    - name: Create directory for log
+      file: path=/var/www/sitename/log state=directory mode=0755 owner=ec2-user group=ec2-user
+
+    - name: Create file for error log
+      file: path=/var/www/sitename/log/nginx.error.log state=touch mode=0755 owner=ec2-user group=ec2-user
 
     # time zoneを日本の時刻に合わせる
     - name: Set Timezone.
@@ -27,3 +32,7 @@
 
     - name: Update /etc/localtime.
       file: src=/usr/share/zoneinfo/Asia/Tokyo dest=/etc/localtime state=link force=yes
+
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted

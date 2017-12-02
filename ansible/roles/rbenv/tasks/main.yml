@@ -19,44 +19,45 @@
     - mysql-devel
     - patch
 
-# 先にgitを入れておかないいとdry runでこけるので注意
+# 先にgitを入れておかないとdry runでこけるので注意
 - name: install rbenv
   git: repo=https://github.com/sstephenson/rbenv.git dest=~/.rbenv
+  become_user: "{{ rbenv_user }}"
 
 - name: add ~.rbenv/bin to PATH
   lineinfile: >
     dest="~/.bash_profile"
     line="export PATH=$HOME/.rbenv/bin:$PATH"
+  become_user: "{{ rbenv_user }}"
 
 - name: eval rbenv init in ~/.bash_profile
   lineinfile: >
     dest="~/.bash_profile"
     line='eval "$(rbenv init -)"'
+  become_user: "{{ rbenv_user }}"
 
 - name: install ruby-build as rbenv plugin
   git: repo=https://github.com/sstephenson/ruby-build.git dest=~/.rbenv/plugins/ruby-build
+  become_user: "{{ rbenv_user }}"
 
-# become使えと言われるので要修正
 - name: Check if version is installed ruby
-  shell: "sudo -iu {{ rbenv_user }} rbenv versions | grep {{ rbenv_ruby_version }}"
+  shell: bash -lc "rbenv versions | grep {{ rbenv_ruby_version }}"
   register: rbenv_check_install
-  changed_when: False
+  changed_when: False # 実行時にchangedになる条件を設定、shellは叩くと常に実行されるのでchangedにカウントされる
   ignore_errors: yes
+  become_user: "{{ rbenv_user }}"
 
 - name: install ruby
-  command: "sudo -iu {{ rbenv_user }} rbenv install {{ rbenv_ruby_version }}"
-  when: rbenv_check_install|failed
-
-- name: Check if version is the default ruby version
-  shell: "sudo -iu {{ rbenv_user }} rbenv version | grep {{ rbenv_ruby_version }}"
-  register: rbenv_check_default
-  changed_when: False
-  ignore_errors: yes
+  shell: bash -lc "rbenv install -v {{ rbenv_ruby_version }}" dest=~/.rbenv/shims/
+  become_user: "{{ rbenv_user }}"
+  when: rbenv_check_install|failed # rbenv_check_installがfailedの時だけ処理を実行する
 
 - name: rbenv rehash
-  command: "rbenv rehash"
-  when: rbenv_check_default|failed
+  shell: bash -lc "rbenv rehash"
+  become_user: "{{ rbenv_user }}"
+  when: rbenv_check_install|failed
 
 - name: set default ruby version
-  command: "rbenv global {{ rbenv_ruby_version }}"
-  when: rbenv_check_default|failed
+  shell: bash -lc "rbenv global {{ rbenv_ruby_version }}"
+  become_user: "{{ rbenv_user }}"
+  when: rbenv_check_install|failed

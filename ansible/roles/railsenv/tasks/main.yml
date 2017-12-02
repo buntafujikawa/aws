@@ -1,5 +1,3 @@
 ---
 - name: Install bundler
-  gem: name={{ item }} executable=.rbenv/shims/gem user_install=False
-  with_items:
-    - bundler
+  gem: name=bundler executable=.rbenv/shims/gem user_install=False
